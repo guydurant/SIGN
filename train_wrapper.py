@@ -212,12 +212,27 @@ def train_model(args, model, trn_loader, val_loader):
                 # path = os.path.join(args.model_dir, 'saved_model')
                 # paddle.save(obj, path)
                 # model.save(f'temp_model/{args.model_name}')
-                pickle.save(model, f'temp_model/{args.model_name}')
+                pickle.save(model, open(f'temp_model/{args.model_name}', 'wb'))
         # f.close()
 
     # # f = open(os.path.join(args.model_dir, 'log.txt'), 'w')
     # f.write(running_log + res_tst_best)
     # f.close()
+
+def predict(model, loader, csv_file):
+    test_index = pd.read_csv(csv_file)['key'].tolist()
+    model.eval()
+    y_hat_list = []
+    y_list = []
+    for batch_data in loader:
+        a2a_g, b2a_g, b2b_gl, feats, types, counts, y = batch_data
+        _, y_hat = model(a2a_g, b2a_g, b2b_gl, types, counts)
+        y_hat_list += y_hat.tolist()
+        y_list += y.tolist()
+
+    y_hat = np.array(y_hat_list).reshape(-1,)
+    y = np.array(y_list).reshape(-1,)
+    return pd.DataFrame({'key': test_index, 'pred': y_hat, 'pk': y})
 
 
 if __name__ == '__main__':
@@ -286,9 +301,10 @@ if __name__ == '__main__':
         if not os.path.exists(f'temp_features/{args.val_csv_file.split("/")[-1].split(".")[0]}_features.pkl'):
             print('Extracting features...')
             process_dataset(args.val_csv_file, args.val_data_dir, args.cut_dist)
-        model = pickle.load(f'temp_model/{args.model_name}')
+        model = pickle.load(open(f'temp_model/{args.model_name}', 'rb'))
         val_complex = ComplexDataset('temp_features', f"{args.val_csv_file.split('/')[-1].split('.')[0]}_features", args.cut_dist, args.num_angle)
         val_loader = Dataloader(val_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
-        evaluate(model, val_loader)
+        df = evaluate(model, val_loader)
+        df.to_csv(f'results/{args.model_name}_{args.val_csv_file.split("/")[-1]}', index=False)
         
 
