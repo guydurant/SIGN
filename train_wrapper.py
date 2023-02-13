@@ -24,19 +24,14 @@ def make_protein_pocket_file(protein_file, ligand_file, key):
     # cmd.load(f'temp_files/{protein_file.split("/")[-1].split(".")[0]}_charged.mol2', 'protein')
     cmd.load(ligand_file, 'ligand')
     cmd.select('pocket', 'byres (ligand around 6)')
-    cmd.save(f'temp_files/{key}_pocket.mol2', 'pocket')
+    cmd.save(f'temp_files/{key}_pocket.pdb', 'pocket')
     cmd.delete('all')
     return None
 
-# def calculate_charges(file_name):
-#     #write .cxc file
-#     #print currenty path
-#     print(os.getcwd())
-#     with open('temp_files/charge.cxc', 'w') as f:
-#         f.write(f'open {file_name}\naddcharge\n save {os.getcwd()}/temp_files/{file_name.split("/")[-1].split(".")[0]}_charged.mol2\n delete all\n exit')
-#     #run cxc
-#     os.system('chimerax --nogui temp_files/charge.cxc')
-#     return None
+def calculate_charges_for_pocket(key):
+    os.system(f'echo "open temp_files/{key}_pocket.pdb \n addh \n addcharge \n  save tmp.mol2 \n exit" | chimerax --nogui')
+    # Do not use TIP3P atom types, pybel cannot read them
+    os.system(f"sed 's/H\.t3p/H    /' tmp.mol2 | sed 's/O\.t3p/O\.3  /' > temp_files/{key}_pocket.mol2")
 
 def pocket_atom_num_from_mol2(key):
     n = 0
@@ -67,6 +62,7 @@ def gen_feature(protein_file, ligand_file, key, featurizer):
     ligand_coords, ligand_features = featurizer.get_features(ligand, molcode=1)
     # calculate_charges(protein_file)
     make_protein_pocket_file(protein_file, ligand_file, key)
+    calculate_charges_for_pocket(key)
     pocket = next(pybel.readfile('mol2' , f'temp_files/{key}_pocket.mol2'))
     pocket_coords, pocket_features = featurizer.get_features(pocket, molcode=-1)
     node_num = pocket_atom_num_from_mol2(key)
