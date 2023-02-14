@@ -24,7 +24,7 @@ def make_protein_pocket_file(protein_file, ligand_file, key):
     # cmd.load(f'temp_files/{protein_file.split("/")[-1].split(".")[0]}_charged.mol2', 'protein')
     cmd.load(ligand_file, 'ligand')
     cmd.select('pocket', 'byres (ligand around 6)')
-    cmd.save(f'temp_files/{key}_pocket.pdb', 'pocket')
+    cmd.save(f'temp_files/{key}_pocket.mol2', 'pocket')
     cmd.delete('all')
     return None
 
@@ -62,7 +62,7 @@ def gen_feature(protein_file, ligand_file, key, featurizer):
     ligand_coords, ligand_features = featurizer.get_features(ligand, molcode=1)
     # calculate_charges(protein_file)
     make_protein_pocket_file(protein_file, ligand_file, key)
-    calculate_charges_for_pocket(key)
+    # calculate_charges_for_pocket(key)
     pocket = next(pybel.readfile('mol2' , f'temp_files/{key}_pocket.mol2'))
     pocket_coords, pocket_features = featurizer.get_features(pocket, molcode=-1)
     node_num = pocket_atom_num_from_mol2(key)
