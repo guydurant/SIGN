@@ -286,8 +286,8 @@ if __name__ == '__main__':
             paddle.set_device('cpu')
         else:
             paddle.set_device('gpu:%s' % args.cuda)
-        trn_complex = ComplexDataset('temp_features', f"{args.csv_file.split('/')[-1].split('.')[0]}_features", args.cut_dist, args.num_angle)
-        val_complex = ComplexDataset('temp_features', f"{args.val_csv_file.split('/')[-1].split('.')[0]}_features", args.cut_dist, args.num_angle)
+        trn_complex = ComplexDataset('temp_features', f"{args.csv_file.split('/')[-1].split('.')[0]}_features.pkl", args.cut_dist, args.num_angle)
+        val_complex = ComplexDataset('temp_features', f"{args.val_csv_file.split('/')[-1].split('.')[0]}_features.pkl", args.cut_dist, args.num_angle)
         trn_loader = Dataloader(trn_complex, args.batch_size, shuffle=True, num_workers=1, collate_fn=collate_fn)
         val_loader = Dataloader(val_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
 
