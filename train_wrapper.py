@@ -208,7 +208,7 @@ def train_model(args, model, trn_loader, val_loader):
                 # path = os.path.join(args.model_dir, 'saved_model')
                 # paddle.save(obj, path)
                 # model.save(f'temp_model/{args.model_name}')
-                pickle.save(model, open(f'temp_model/{args.model_name}.pkl', 'wb'))
+                pickle.dump(model, open(f'temp_model/{args.model_name}.pkl', 'wb'))
         # f.close()
 
     # # f = open(os.path.join(args.model_dir, 'log.txt'), 'w')
