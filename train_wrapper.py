@@ -208,7 +208,7 @@ def train_model(args, model, trn_loader, val_loader):
                 # path = os.path.join(args.model_dir, 'saved_model')
                 # paddle.save(obj, path)
                 # model.save(f'temp_model/{args.model_name}')
-                pickle.dump(model, open(f'temp_model/{args.model_name}.pkl', 'wb'))
+                pickle.dump(model, open(f'temp_models/{args.model_name}.pkl', 'wb'))
         # f.close()
 
     # # f = open(os.path.join(args.model_dir, 'log.txt'), 'w')
@@ -297,7 +297,7 @@ if __name__ == '__main__':
         if not os.path.exists(f'temp_features/{args.val_csv_file.split("/")[-1].split(".")[0]}_features.pkl'):
             print('Extracting features...')
             process_dataset(args.val_csv_file, args.val_data_dir, args.cut_dist)
-        model = pickle.load(open(f'temp_model/{args.model_name}.pkl', 'rb'))
+        model = pickle.load(open(f'temp_models/{args.model_name}.pkl', 'rb'))
         val_complex = ComplexDataset('temp_features', f"{args.val_csv_file.split('/')[-1].split('.')[0]}_features", args.cut_dist, args.num_angle)
         val_loader = Dataloader(val_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
         df = evaluate(model, val_loader)
