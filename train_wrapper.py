@@ -267,6 +267,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     #get as full path not relative path
     args.data_dir = os.path.abspath(args.data_dir)
+    args.activation = F.relu
     if args.train:
         if not os.path.exists(f'temp_features/{args.csv_file.split("/")[-1].split(".")[0]}_features.pkl'):
             print('Extracting features...')
@@ -274,7 +275,6 @@ if __name__ == '__main__':
         if not os.path.exists(f'temp_features/{args.val_csv_file.split("/")[-1].split(".")[0]}_features.pkl'):
             print('Extracting features...')
             process_dataset(args.val_csv_file, args.val_data_dir, args.cut_dist)
-        args.activation = F.relu
         args.dense_dims = [eval(dim) for dim in args.dense_dims.split(',')]
         if args.seed:
             setup_seed(args.seed)
