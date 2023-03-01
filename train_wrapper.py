@@ -268,26 +268,26 @@ if __name__ == '__main__':
     #get as full path not relative path
     args.data_dir = os.path.abspath(args.data_dir)
     args.activation = F.relu
+    args.dense_dims = [eval(dim) for dim in args.dense_dims.split(',')]
+    if args.seed:
+        setup_seed(args.seed)
+
+    # if not os.path.isdir(args.model_dir):
+    #     os.mkdir(args.model_dir)
+    
+    if int(args.cuda) == -1:
+        print('Using CPU')
+        paddle.set_device('cpu')
+    else:
+        print('Using GPU')
+        paddle.set_device('gpu:%s' % args.cuda)
     if args.train:
         if not os.path.exists(f'temp_features/{args.csv_file.split("/")[-1].split(".")[0]}_features.pkl'):
             print('Extracting features...')
             process_dataset(args.csv_file, args.data_dir, args.cut_dist)
         if not os.path.exists(f'temp_features/{args.val_csv_file.split("/")[-1].split(".")[0]}_features.pkl'):
             print('Extracting features...')
-            process_dataset(args.val_csv_file, args.val_data_dir, args.cut_dist)
-        args.dense_dims = [eval(dim) for dim in args.dense_dims.split(',')]
-        if args.seed:
-            setup_seed(args.seed)
-
-        # if not os.path.isdir(args.model_dir):
-        #     os.mkdir(args.model_dir)
-        
-        if int(args.cuda) == -1:
-            print('Using CPU')
-            paddle.set_device('cpu')
-        else:
-            print('Using GPU')
-            paddle.set_device('gpu:%s' % args.cuda)
+            process_dataset(args.val_csv_file, args.val_data_dir, args.cut_dist)    
         trn_complex = ComplexDataset('temp_features', f"{args.csv_file.split('/')[-1].split('.')[0]}_features", args.cut_dist, args.num_angle)
         val_complex = ComplexDataset('temp_features', f"{args.val_csv_file.split('/')[-1].split('.')[0]}_features", args.cut_dist, args.num_angle)
         trn_loader = Dataloader(trn_complex, args.batch_size, shuffle=True, num_workers=1, collate_fn=collate_fn)
