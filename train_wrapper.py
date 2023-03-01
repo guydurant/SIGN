@@ -215,8 +215,8 @@ def train_model(args, model, trn_loader, val_loader):
     # f.write(running_log + res_tst_best)
     # f.close()
 
-def predict(model, loader, csv_file):
-    test_index = pd.read_csv(csv_file)['key'].tolist()
+def predict(model, loader, csv_file, data_dir):
+    test_index = pd.read_csv(data_dir+csv_file)['key'].tolist()
     model.eval()
     y_hat_list = []
     y_list = []
@@ -305,7 +305,7 @@ if __name__ == '__main__':
         model.set_state_dict(obj['model'])
         val_complex = ComplexDataset('temp_features', f"{args.val_csv_file.split('/')[-1].split('.')[0]}_features", args.cut_dist, args.num_angle)
         val_loader = Dataloader(val_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
-        df = evaluate(model, val_loader)
+        df = predict(model, val_loader, args.val_csv_file, args.val_data_dir)
         df.to_csv(f'results/{args.model_name}_{args.val_csv_file.split("/")[-1]}', index=False)
         
 
