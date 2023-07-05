@@ -126,10 +126,15 @@ dependencies:
   - zlib=1.2.13=h166bdaf_4
   - zstd=1.5.2=ha4553b6_0
   - pip:
+      - cython==0.29.33
+      - joblib==1.2.0
       - paddlepaddle-gpu==2.4.2
       - pandas==1.5.3
+      - pgl==2.2.4
       - python-dateutil==2.8.2
       - pytz==2022.7.1
+      - scikit-learn==1.2.1
       - scipy==1.10.1
+      - threadpoolctl==3.1.0
       - tqdm==4.64.1
 prefix: /vols/bitbucket/durant/miniconda3/envs/SIGN_gpu
