@@ -18,7 +18,15 @@ import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
 import pgl
-from layers import SpatialInputLayer, Atom2BondLayer, Bond2BondLayer, Bond2AtomLayer, PiPoolLayer, OutputLayer
+from layers import (
+    SpatialInputLayer,
+    Atom2BondLayer,
+    Bond2BondLayer,
+    Bond2AtomLayer,
+    PiPoolLayer,
+    OutputLayer,
+)
+
 
 class SIGN(nn.Layer):
     def __init__(self, args):
@@ -46,22 +54,42 @@ class SIGN(nn.Layer):
             if i == 0:
                 atom_dim = infeat_dim
             else:
-                atom_dim = hidden_dim * num_heads if 'cat' in merge_b2a else hidden_dim
-            bond_dim = hidden_dim * num_angle if 'cat' in merge_b2b else hidden_dim
+                atom_dim = hidden_dim * num_heads if "cat" in merge_b2a else hidden_dim
+            bond_dim = hidden_dim * num_angle if "cat" in merge_b2b else hidden_dim
 
-            self.atom2bond_layers.append(Atom2BondLayer(atom_dim, bond_dim=hidden_dim, activation=activation))
-            self.bond2bond_layers.append(Bond2BondLayer(hidden_dim, hidden_dim, num_angle, feat_drop, merge=merge_b2b, activation=None))
-            self.bond2atom_layers.append(Bond2AtomLayer(bond_dim, atom_dim, hidden_dim, num_heads, feat_drop, merge=merge_b2a, activation=activation))
+            self.atom2bond_layers.append(
+                Atom2BondLayer(atom_dim, bond_dim=hidden_dim, activation=activation)
+            )
+            self.bond2bond_layers.append(
+                Bond2BondLayer(
+                    hidden_dim,
+                    hidden_dim,
+                    num_angle,
+                    feat_drop,
+                    merge=merge_b2b,
+                    activation=None,
+                )
+            )
+            self.bond2atom_layers.append(
+                Bond2AtomLayer(
+                    bond_dim,
+                    atom_dim,
+                    hidden_dim,
+                    num_heads,
+                    feat_drop,
+                    merge=merge_b2a,
+                    activation=activation,
+                )
+            )
 
         self.pipool_layer = PiPoolLayer(hidden_dim, hidden_dim, num_angle)
         self.output_layer = OutputLayer(hidden_dim, dense_dims)
-    
+
     def forward(self, a2a_g, b2a_g, b2b_gl, bond_types, type_count):
-        atom_feat = a2a_g.node_feat['feat']
-        dist_feat = a2a_g.edge_feat['dist']
-        atom_feat = paddle.cast(atom_feat, 'float32')
-        dist_feat = paddle.cast(dist_feat, 'float32')
-        print(a2a_g.num_edges, a2a_g.edge_feat['dist'].shape)
+        atom_feat = a2a_g.node_feat["feat"]
+        dist_feat = a2a_g.edge_feat["dist"]
+        atom_feat = paddle.cast(atom_feat, "float32")
+        dist_feat = paddle.cast(dist_feat, "float32")
 
         atom_h = atom_feat
         dist_h = self.input_layer(dist_feat)
@@ -73,8 +101,3 @@ class SIGN(nn.Layer):
         pred_inter_mat = self.pipool_layer(bond_types, type_count, bond_h)
         pred_socre = self.output_layer(a2a_g, atom_h)
         return pred_inter_mat, pred_socre
-
-
-
-
-        

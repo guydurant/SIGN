@@ -249,7 +249,6 @@ if __name__ == "__main__":
     cc = 0
     for batch in loader:
         a2a_g, b2a_g, b2b_gl, feats, types, counts, labels = batch
-        print(labels)
         cc += 1
         if cc == 2:
             break
