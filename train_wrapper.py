@@ -29,7 +29,7 @@ paddle.seed(123)
 
 def make_protein_pocket_file(protein_file, ligand_file, key, csv_file):
     if not os.path.exists(f'data/scratch/{csv_file.split("/")[-1].split(".")[0]}'):
-        os.mkdir(f'data/scratch/{csv_file.split("/")[-1].split(".")[0]}')
+        os.makedirs(f'data/scratch/{csv_file.split("/")[-1].split(".")[0]}')
     cmd.load(protein_file, "protein")
     # cmd.load(f'data/scratch/{protein_file.split("/")[-1].split(".")[0]}_charged.mol2', 'protein')
     cmd.load(ligand_file, "ligand")
@@ -372,6 +372,8 @@ if __name__ == "__main__":
         print("Using GPU")
         paddle.set_device("gpu:%s" % args.cuda)
     if args.train:
+        if not os.path.exists("data/features"):
+            os.makedirs("data/features")
         if not os.path.exists(
             f'data/features/{args.csv_file.split("/")[-1].split(".")[0]}_features.pkl'
         ):
@@ -389,21 +391,13 @@ if __name__ == "__main__":
             args.cut_dist,
             args.num_angle,
         )
-        if args.val_csv_file is not None:
-            val_complex = ComplexDataset(
-                "data/features",
-                f"{args.val_csv_file.split('/')[-1].split('.')[0]}_features",
-                args.cut_dist,
-                args.num_angle,
-            )
-        else:
-            # sample 1000 from train set
-            train_data, val_data = train_test_split(
-                trn_complex, test_size=1000, random_state=42
-            )
+        # sample 1000 from train set
+        train_data, val_data = train_test_split(
+            trn_complex, test_size=1000, random_state=42
+        )
 
-            trn_complex = train_data
-            val_complex = val_data
+        trn_complex = train_data
+        val_complex = val_data
 
         trn_loader = Dataloader(
             trn_complex,
@@ -421,6 +415,8 @@ if __name__ == "__main__":
         )
 
         model = SIGN(args)
+        if not os.path.exists("data/models"):
+            os.makedirs("data/models")
         train_model(args, model, trn_loader, val_loader)
     if args.predict:
         if not os.path.exists(
@@ -446,6 +442,8 @@ if __name__ == "__main__":
             collate_fn=collate_fn,
         )
         df = predict(model, val_loader, args.val_csv_file, args.val_data_dir)
+        if not os.path.exists("data/results"):
+            os.makedirs("data/results")
         df.to_csv(
             f'data/results/{args.model_name}_{args.val_csv_file.split("/")[-1]}',
             index=False,
